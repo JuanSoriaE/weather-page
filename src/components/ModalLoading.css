@@ -2,17 +2,19 @@
   width: 100vw;
   height: 100vh;
   background-color: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(2px);
   position: absolute;
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1;
 }
 
 .loading-spinner {
   width: 100px;
   height: 100px;
-  border: 17px solid #f3f3f3;
-  border-top: 17px solid #383636;
+  border: 17px solid #fff;
+  border-top: 17px solid rgb(165, 221, 253);
   border-radius: 50%;
   animation: spinner 1.5s linear infinite;
 }

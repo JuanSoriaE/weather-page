@@ -45,25 +45,22 @@
   top: 5px;
 }
 
-svg {
+.waves {
   position: absolute;
   left: 0;
   bottom: 45%;
 }
 
-svg > path {
-  width: 100vw;
-}
-
 .specific-info {
   width: 100%;
   height: calc(45% - 10px);
-  text-align: center;
+  background-color: #fefeff;
 }
 
 .city-name {
   margin: 0;
   font-weight: 600;
+  text-align: center;
 }
 
 .degs::after {
@@ -95,6 +92,30 @@ svg > path {
 }
 
 .info-card-value {
+}
+
+/* FORECAST WEATHER */
+
+.tomorrow-text {
+  margin: 15px 20px 5px 20px;
+}
+
+.forecast-weather-container {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+
+.forecast-weather-element {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  align-items: center;
+}
+
+.weather-icon {
+  width: 30px;
+  height: 30px;
 }
 
 @media only screen and (max-width: 600px) {
