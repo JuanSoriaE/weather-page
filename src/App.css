@@ -26,23 +26,27 @@
   width: 70%;
   text-align: left;
   padding: 0.3em 1em 0.3em 1em;
+  color: #fff;
 }
 
-.weather-status {
+#weather-status {
   font-weight: 600;
   font-size: 20px;
+  color: #fff;
 }
 
-.weather-deg {
+#weather-deg {
   font-size: 50px;
   position: relative;
+  color: #fff;
 }
 
-.weather-deg::after {
+#weather-deg::after {
   content: 'º';
   font-size: 40px;
   position: absolute;
   top: 5px;
+  color: #fff;
 }
 
 .waves {
@@ -91,12 +95,23 @@
   font-size: 20px;
 }
 
-.info-card-value {
-}
-
 /* FORECAST WEATHER */
 
-.tomorrow-text {
+.specific-info > select {
+  all: unset;
+  border: 2px solid;
+  padding: 3px;
+  border-radius: 5px;
+  font-size: 15px;
+  font-weight: 500;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 5px 15px 0px;
+}
+
+#select-hour {
+  margin-left: 10px;
+}
+
+.date-text {
   margin: 15px 20px 5px 20px;
 }
 
