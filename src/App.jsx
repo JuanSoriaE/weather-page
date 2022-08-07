@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
-import { BsCloudRain, BsClouds } from 'react-icons/bs';
-import { IoSnowOutline, IoThunderstormOutline } from 'react-icons/io5';
-import { TiWeatherSunny } from 'react-icons/ti';
+import { BsCloudDrizzle, BsCloudMoon, BsCloudRain, BsCloudSun } from 'react-icons/bs';
+import { IoSnowOutline } from 'react-icons/io5';
+import { TbMist } from 'react-icons/tb';
+import { TiWeatherNight, TiWeatherSunny } from 'react-icons/ti';
+import { WiDayThunderstorm, WiNightAltThunderstorm } from 'react-icons/wi';
 import './App.css';
 import ModalLoading from './components/ModalLoading';
 
 
 const APIKEY = '573f8e9a386bca9cafc258bce0c1d683';
-// const url = (city = 'californ') => `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${APIKEY}`;
 const url = (city = 'californ') => `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${APIKEY}`;
 const url_current = (city = 'californ') => `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${APIKEY}`;
 
@@ -26,32 +27,62 @@ const FONTCOLORDICTIONARY = {
   thunderstorm: 'rgb(1, 30, 61)'
 }
 const ICONDICTIONARY = {
-  clouds: <BsClouds className='weather-icon' />,
-  rain: <BsCloudRain className='weather-icon' />,
-  clear: <TiWeatherSunny className='weather-icon' />,
-  snow: <IoSnowOutline className='weather-icon' />,
-  thunderstorm: <IoThunderstormOutline className='weather-icon' />
+  // DAY
+  '01d': <TiWeatherSunny className='weather-icon' />,
+  '02d': <BsCloudSun className='weather-icon' />,
+  '09d': <BsCloudDrizzle className='weather-icon' />,
+  '10d': <BsCloudRain className='weather-icon' />,
+  '11d': <WiDayThunderstorm className='weather-icon' />,
+  '13d': <IoSnowOutline className='weather-icon' />,
+  '50d': <TbMist className='weather-icon' />,
+  // NIGHT
+  '01n': <TiWeatherNight className='weather-icon' />,
+  '02n': <BsCloudMoon className='weather-icon' />,
+  '09n': <BsCloudDrizzle className='weather-icon' />,
+  '10n': <BsCloudRain className='weather-icon' />,
+  '11n': <WiNightAltThunderstorm className='weather-icon' />,
+  '13n': <IoSnowOutline className='weather-icon' />,
+  '50n': <TbMist className='weather-icon' />,
 };
-
-const formatKey = key => {
-  key = key.replace('_', ' ');
-  return key.charAt(0).toUpperCase() + key.slice(1);
+const MAINDATADICTIONARY = {
+  temp: 'Temperature',
+  temp_min: 'Min Temperature',
+  temp_max: 'Max Temperature',
+  feels_like: 'Feels like',
+  humidity: 'Humidity',
+  pressure: 'Pressure',
+  sea_level: 'Sea level pressure',
+  grnd_level: 'Ground level pressure'
 };
-
-const infoCard = (key, value, i) => (
-  <div className='info-card' key={ i }>
-    <span className='info-card-title'>{ formatKey(key) }: </span>
-    <span className={ 'info-card-value' + ((key.includes('temp') || key === 'feels_like') && ' degs') }>{ (key.includes('temp') || key === 'feels_like') ? Math.round(value - 273.15) : value }</span>
-  </div>
-);
 
 const forecastWeatherElement = (key, hour = 'now', index) => {
+  if (key === '03d' || key === '04d') key = '02d';
+  if (key === '03n' || key === '04n') key = '02n';
+
   return (
   <div className='forecast-weather-element' key={ index }>
     { ICONDICTIONARY[key] }
     <span>{ hour }</span>
   </div>
 )};
+
+const infoData = (data) => {
+  // infot_to_display: true = today | false = forecast
+  if (data.temp_kf) delete data.temp_kf;
+
+  return (
+    <div className='info-data-container'>
+      {
+        Object.entries(data).map((info_data, index) => (
+          <div key={ index } className='info-data-row'>
+            <div className='info-data-key'>{ MAINDATADICTIONARY[info_data[0]] }</div>
+            <div className={ 'info-data-value' + ((info_data[0].includes('temp') || info_data[0] === 'feels_like') ? ' degs' : '') }>{ (info_data[0].includes('temp') || info_data[0] === 'feels_like') ? Math.round(info_data[1] - 273.15) : info_data[1] }</div>
+          </div>
+        ))
+      }
+    </div>
+  );
+};
 
 function App() {
   
@@ -65,6 +96,7 @@ function App() {
   const [hour, setHour] = useState('');
   const [hours_arr, setHoursArr] = useState([]);
   const [required_index, setRequiredIndex] = useState(0);
+  const [current_info_display, setCurrentInfoDisplay] = useState(true); // true = today | false = forecast
 
   const handleSuccessFetch = (data, city) => {
     // Set state
@@ -74,7 +106,6 @@ function App() {
     setDate(data.list[0].dt_txt.split(' ')[0]);
     setHour(data.list[0].dt_txt.split(' ')[1]);
 
-
     // Set initial hours arr
     setHoursArr(
       [... new Set(
@@ -83,7 +114,6 @@ function App() {
         .map(ele => ele.split(' ')[1])
       )]
     );
-    
   };
 
   const handleSuccessFetchCurrentData = (data, city) => {
@@ -170,18 +200,34 @@ function App() {
     changeForecastData(date, e.target.value);
   };
 
+  const handleTabChange = tab => {
+    let today_tab = document.getElementById('today-tab');
+    let forecast_tab = document.getElementById('forecast-tab');
+
+    if (tab === 'today') {
+      setCurrentInfoDisplay(true);
+
+      forecast_tab.style.border = 'none';
+      today_tab.style.borderBottom = `2px solid ${font_color}`;
+    } else {
+      setCurrentInfoDisplay(false);
+
+      today_tab.style.borderBottom = 'none';
+      forecast_tab.style.borderBottom = `2px solid ${font_color}`;
+    }
+  };
+
   useEffect(() => {
     fetchCurrentData();
     fetchData();
   }, []);
 
-  return data.city && (
+  return (data.city && current_data) && (
     <div className='App'>
       {
         // Loading Spinner
         status === 'loading' && <ModalLoading />
       }
-      {/* GOOD ONE */}
       <div className='main-info' style={ {background: background} }>
         <div className='input-container'>
           <input type='text' className='city-input' id='city-name' placeholder='City Name' onChange={ handleInputChange } autoComplete='off' />
@@ -213,17 +259,21 @@ function App() {
         </select>
         <div className='forecast-weather-container'>
           {
-            data.list.slice(required_index, required_index + 5).map((ele, i) => forecastWeatherElement(ele.weather[0].main.toLowerCase(), ele.dt_txt.split(' ')[1].split(':')[0], i))
+            data.list.slice(required_index, required_index + 5).map((ele, i) => forecastWeatherElement(ele.weather[0].icon, ele.dt_txt.split(' ')[1].split(':')[0], i))
           }
         </div>
-        <div className='info-cards-container'>
-          {/* {
-            Object.keys(data.main).map((key, i) => infoCard(key, data.main[key], i))
-          } */}
+        <div className='info-main'>
+          <div className='tabs-container'>
+            <div id='today-tab' className='info-main-tab' style={ {borderBottom: `2px solid ${font_color}`} } onClick={ () => handleTabChange('today') }>TODAY</div>
+            <div id='forecast-tab' className='info-main-tab' onClick={ () => handleTabChange('forecast') }>FORECAST</div>
+          </div>
+          {
+            current_info_display ? infoData(current_data.main) : infoData(data.list.filter(ele => ele.dt_txt === date + ' ' + hour)[0].main)
+          }
         </div>
       </div>
     </div>
   )
 }
 
-export default App
+export default App;

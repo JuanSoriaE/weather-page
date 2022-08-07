@@ -63,36 +63,13 @@
 
 .city-name {
   margin: 0;
+  margin-bottom: 20px;
   font-weight: 600;
   text-align: center;
 }
 
 .degs::after {
   content: 'º';
-}
-
-.info-cards-container {
-  padding: 20px;
-  display: flex;
-  overflow-x: scroll;
-  gap: 30px;
-  justify-content: center;
-}
-
-.info-card {
-  min-width: 80px;
-  min-height: 100px;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  border-radius: 10px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-}
-
-.info-card-title {
-  font-weight: 600;
-  font-size: 20px;
 }
 
 /* FORECAST WEATHER */
@@ -131,6 +108,38 @@
 .weather-icon {
   width: 30px;
   height: 30px;
+}
+
+/* INFORMATION   */
+
+.tabs-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.info-main-tab {
+  width: 40%;
+  text-align: center;
+  cursor: pointer;
+  padding: 2px;
+  margin-top: 20px;
+}
+
+/* INFORMATION DATA */
+.info-data-container {
+  margin: 20px 30px;
+}
+
+.info-data-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 25px;
+}
+
+.info-data-key {
+  font-weight: 500;
+
 }
 
 @media only screen and (max-width: 600px) {
