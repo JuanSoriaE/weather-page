@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { BsCloudDrizzle, BsCloudMoon, BsCloudRain, BsCloudSun } from 'react-icons/bs';
 import { IoSnowOutline } from 'react-icons/io5';
 import { TbMist } from 'react-icons/tb';
@@ -13,18 +13,40 @@ const url = (city = 'californ') => `https://api.openweathermap.org/data/2.5/fore
 const url_current = (city = 'californ') => `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${APIKEY}`;
 
 const BGDICTIONARY = {
-  clouds: 'linear-gradient(0deg, rgba(232,232,232,1) 0%, rgba(168,168,203,1) 35%, rgba(152,178,212,1) 100%)',
-  rain: 'linear-gradient(0deg, rgba(167,167,167,1) 0%, rgba(117,117,156,1) 35%, rgba(75,96,128,1) 100%)',
-  clear: 'linear-gradient(0deg, rgba(189,213,223,1) 0%, rgba(161,205,255,1) 25%, rgba(89,155,255,1) 100%)',
-  snow: 'linear-gradient(0deg, rgba(201,201,201,1) 0%, rgba(186,186,224,1) 35%, rgba(191,207,235,1) 100%)',
-  thunderstorm: 'linear-gradient(0deg, rgba(42,71,84,1) 0%, rgba(0,40,83,1) 25%, rgba(0,28,69,1) 100%)'
+  // DAY
+  '01d': 'linear-gradient(0deg, rgba(189,213,223,1) 0%, rgba(161,205,255,1) 25%, rgba(89,155,255,1) 100%)',
+  '02d': 'linear-gradient(0deg, rgba(232,232,232,1) 0%, rgba(168,168,203,1) 35%, rgba(152,178,212,1) 100%)',
+  '09d': 'linear-gradient(0deg, rgba(167,167,167,1) 0%, rgba(117,117,156,1) 35%, rgba(75,96,128,1) 100%)',
+  '10d': 'linear-gradient(0deg, rgba(167,167,167,1) 0%, rgba(117,117,156,1) 35%, rgba(75,96,128,1) 100%)',
+  '11d': 'linear-gradient(0deg, rgba(42,71,84,1) 0%, rgba(0,40,83,1) 25%, rgba(0,28,69,1) 100%)',
+  '13d': 'linear-gradient(0deg, rgba(201,201,201,1) 0%, rgba(186,186,224,1) 35%, rgba(191,207,235,1) 100%)',
+  '50d': 'rgb(203,203,203)',
+  // NIGHT
+  '01n': 'linear-gradient(0deg, rgba(46,85,116,1) 0%, rgba(14,50,92,1) 35%, rgba(13,45,96,1) 100%)',
+  '02n': 'linear-gradient(0deg, rgba(90,94,106,1) 0%, rgba(43,60,80,1) 35%, rgba(25,41,65,1) 100%)',
+  '09n': 'linear-gradient(0deg, rgba(90,94,106,1) 0%, rgba(43,60,80,1) 35%, rgba(25,41,65,1) 100%)',
+  '10n': 'linear-gradient(0deg, rgba(90,94,106,1) 0%, rgba(43,60,80,1) 35%, rgba(25,41,65,1) 100%)',
+  '11n': 'linear-gradient(0deg, rgba(59,62,70,1) 0%, rgba(37,52,70,1) 35%, rgba(18,33,55,1) 100%)',
+  '13n': 'linear-gradient(0deg, rgba(90,94,106,1) 0%, rgba(43,60,80,1) 35%, rgba(25,41,65,1) 100%)',
+  '50n': 'rgb(50,50,50)'
 };
 const FONTCOLORDICTIONARY = {
-  clouds: 'rgb(149, 148, 181)',
-  rain: 'rgb(103, 103, 138)',
-  clear: 'rgb(123, 163, 209)',
-  snow: 'rgb(140, 140, 156)',
-  thunderstorm: 'rgb(1, 30, 61)'
+  // DAY
+  '01d': 'rgb(123, 163, 209)',
+  '02d': 'rgb(149, 148, 181)',
+  '09d': 'rgb(103, 103, 138)',
+  '10d': 'rgb(103, 103, 138)',
+  '11d': 'rgb(1, 30, 61)',
+  '13d': 'rgb(140, 140, 156)',
+  '50d': 'rgb(203,203,203)',
+  // NIGHT
+  '01n': 'rgb(39, 73, 99)',
+  '02n': 'rgb(90,94,106)',
+  '09n': 'rgb(90,94,106)',
+  '10n': 'rgb(90,94,106)',
+  '11n': 'rgb(21, 29, 51)',
+  '13n': 'rgb(54, 54, 61)',
+  '50n': 'rgb(50,50,50)'
 }
 const ICONDICTIONARY = {
   // DAY
@@ -60,11 +82,12 @@ const forecastWeatherElement = (key, hour, index) => {
   if (key === '03n' || key === '04n') key = '02n';
 
   return (
-  <div className='forecast-weather-element' key={ index }>
-    { ICONDICTIONARY[key] }
-    <span>{ hour }</span>
-  </div>
-)};
+    <div className='forecast-weather-element' key={ index }>
+      { ICONDICTIONARY[key] }
+      <span>{ hour }</span>
+    </div>
+  )
+};
 
 const getUnitsClass = key => {
   if (key.includes('temp') || key === 'feels_like') return ' degs';
@@ -74,6 +97,11 @@ const getUnitsClass = key => {
 };
 
 const infoData = (data) => {
+  if (!data) return (
+    <div className='info-data-container'>
+      <span>No data available.</span>
+    </div>
+  );
   // infot_to_display: true = today | false = forecast
   if (data.temp_kf) delete data.temp_kf;
 
@@ -106,6 +134,40 @@ function App() {
   const [hours_arr, setHoursArr] = useState([]);
   const [required_index, setRequiredIndex] = useState(0);
   const [current_info_display, setCurrentInfoDisplay] = useState(true); // true = today | false = forecast
+  
+  const main_info_ref = useRef(null);
+
+  const cleanRain = () => {
+    var child = main_info_ref.current.lastElementChild;
+
+    while (child.nodeName === 'I') {
+      main_info_ref.current.removeChild(child);
+      child = main_info_ref.current.lastElementChild;
+    }
+  };
+
+  const rain = (num_of_drops = 30, duration = 1, min_duration = 0.4, snow = false) => {
+    if (main_info_ref.current) {
+      cleanRain();
+      // Create drops
+      let index = 0;
+      while (index < num_of_drops) {
+        let drop = document.createElement('i');
+        drop.classList.add('drop');
+        snow && drop.classList.add('snow');
+        let x = innerWidth * Math.random();
+        let time = duration * Math.random();
+
+        drop.style.animationDuration = time <= min_duration ? time + min_duration + 's' : time + 's';
+        drop.style.animationDelay = time + 's';
+        drop.style.left = x +  'px';
+
+        main_info_ref.current.appendChild(drop);
+
+        index++;
+      }
+    }
+  };
 
   const handleSuccessFetch = (data, city) => {
     // Set state
@@ -125,23 +187,28 @@ function App() {
     );
   };
 
-  const handleSuccessFetchCurrentData = (data, city) => {
-    console.log(data)
-    const key = data.weather[0].main.toLowerCase();
-
+  const handleSuccessFetchCurrentData = (data) => {
     // Set current data
     setCurrentData(data);
+
+    var key = data.weather[0].icon;
+
+    // Set drizzle, rain, thunderstorm or snow
+    cleanRain();
+    if (key === '09d' || key === '09n') rain(10); // Drizzle
+    if (key === '10d' || key === '10n') rain(); // Rain
+    if (key === '11d' || key === '11n') rain(50, 0.8); // ThunderStorm
+    if (key === '13d' || key === '13n') rain(20, 2, 1.5, true); // Snow
+
+    // Set styles
+    if (key === '03d' || key === '04d') key = '02d';
+    if (key === '03n' || key === '04n') key = '02n';
 
     // Set style
     const background = BGDICTIONARY[key];
     setBackground(background);
     const font_color = FONTCOLORDICTIONARY[key];
     setFontColor(font_color);
-
-    // Set rain or snow
-    // if (key === 'rain') console.log('RAIN');
-    // if (key === 'snow') console.log('SNOW');
-    // if (key === 'thunderstorm') console.log('THUNDERSTORM');
   };
 
   const fetchCurrentData = city => {
@@ -152,7 +219,7 @@ function App() {
         if (data.cod != 200) return setStatus('no res');
         handleSuccessFetchCurrentData(data, city);
       })
-      .catch(err => console.error(err));
+      .catch(err => {});
   };
   
   const fetchData = city => {
@@ -237,7 +304,7 @@ function App() {
         // Loading Spinner
         status === 'loading' && <ModalLoading />
       }
-      <div className='main-info' style={ {background: background} }>
+      <div id='main-info' ref={ main_info_ref } style={ {background: background} }>
         <div className='input-container'>
           <input type='text' className='city-input' id='city-name' placeholder='City Name' onChange={ handleInputChange } autoComplete='off' />
         </div>
@@ -278,7 +345,7 @@ function App() {
               <div id='forecast-tab' className='info-main-tab' onClick={ () => handleTabChange('forecast') }>FORECAST</div>
             </div>
             {
-              (current_info_display ? infoData(current_data.main) : infoData(data.list.filter(ele => ele.dt_txt === date + ' ' + hour)[0].main)) || ''
+              (current_info_display ? infoData(current_data.main) : infoData(data.list[required_index].main)) || ''
             }
           </div>
         </div>
