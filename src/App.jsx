@@ -55,7 +55,7 @@ const MAINDATADICTIONARY = {
   grnd_level: 'Ground level pressure'
 };
 
-const forecastWeatherElement = (key, hour = 'now', index) => {
+const forecastWeatherElement = (key, hour, index) => {
   if (key === '03d' || key === '04d') key = '02d';
   if (key === '03n' || key === '04n') key = '02n';
 
@@ -65,6 +65,13 @@ const forecastWeatherElement = (key, hour = 'now', index) => {
     <span>{ hour }</span>
   </div>
 )};
+
+const getUnitsClass = key => {
+  if (key.includes('temp') || key === 'feels_like') return ' degs';
+  if (key.includes('level') || key === 'pressure') return ' pressure';
+  if (key === 'humidity') return ' humidity';
+  return '';
+};
 
 const infoData = (data) => {
   // infot_to_display: true = today | false = forecast
@@ -76,7 +83,9 @@ const infoData = (data) => {
         Object.entries(data).map((info_data, index) => (
           <div key={ index } className='info-data-row'>
             <div className='info-data-key'>{ MAINDATADICTIONARY[info_data[0]] }</div>
-            <div className={ 'info-data-value' + ((info_data[0].includes('temp') || info_data[0] === 'feels_like') ? ' degs' : '') }>{ (info_data[0].includes('temp') || info_data[0] === 'feels_like') ? Math.round(info_data[1] - 273.15) : info_data[1] }</div>
+            <div className={ 'info-data-value' + getUnitsClass(info_data[0]) }>
+              { (info_data[0].includes('temp') || info_data[0] === 'feels_like') ? Math.round(info_data[1] - 273.15) : info_data[1] }
+            </div>
           </div>
         ))
       }
@@ -117,6 +126,7 @@ function App() {
   };
 
   const handleSuccessFetchCurrentData = (data, city) => {
+    console.log(data)
     const key = data.weather[0].main.toLowerCase();
 
     // Set current data
@@ -154,7 +164,6 @@ function App() {
       })
       .catch(err => {
         setStatus('err');
-        console.error(err);
       });
   };
 
@@ -232,46 +241,49 @@ function App() {
         <div className='input-container'>
           <input type='text' className='city-input' id='city-name' placeholder='City Name' onChange={ handleInputChange } autoComplete='off' />
         </div>
-        <span id='weather-status'>{ current_data.weather[0].main }</span>
+        <span id='weather-status'>{ current_data.weather[0].description }</span>
         <span id='weather-deg'>{ Math.round(current_data.main.temp - 273.15) }</span>
       </div>
-      <svg className='waves' xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="#fefeff" fillOpacity="1" d="M0,64L40,64C80,64,160,64,240,90.7C320,117,400,171,480,181.3C560,192,640,160,720,154.7C800,149,880,171,960,181.3C1040,192,1120,192,1200,186.7C1280,181,1360,171,1400,165.3L1440,160L1440,320L1400,320C1360,320,1280,320,1200,320C1120,320,1040,320,960,320C880,320,800,320,720,320C640,320,560,320,480,320C400,320,320,320,240,320C160,320,80,320,40,320L0,320Z"></path></svg>
-      <div className='specific-info'>
-        <h1 className='city-name' style={ {color: font_color} }>{ data.city.name }</h1>
-        <span className='date-text bold'>Date: </span>
-        <select id="select-date" onChange={ handleDateSelectChange } style={ {
-          borderColor: font_color.replace('rgb', 'rgba').replace(')', ', 0.4)')
-        } }>
-          {
-            getDatesArr(data.list).map((date, index) => (
-              <option key={ index } value={ date }>{ date }</option>
-            ))
-          }
-        </select>
-        <select id="select-hour" onChange={ handleHourSelectChange } style={ {
-          borderColor: font_color.replace('rgb', 'rgba').replace(')', ', 0.4)')
-        } }>
-          {
-            hours_arr.map((hour, index) => (
-              <option key={ index } value={ hour }>{ hour }</option>
-            ))
-          }
-        </select>
-        <div className='forecast-weather-container'>
-          {
-            data.list.slice(required_index, required_index + 5).map((ele, i) => forecastWeatherElement(ele.weather[0].icon, ele.dt_txt.split(' ')[1].split(':')[0], i))
-          }
-        </div>
-        <div className='info-main'>
-          <div className='tabs-container'>
-            <div id='today-tab' className='info-main-tab' style={ {borderBottom: `2px solid ${font_color}`} } onClick={ () => handleTabChange('today') }>TODAY</div>
-            <div id='forecast-tab' className='info-main-tab' onClick={ () => handleTabChange('forecast') }>FORECAST</div>
+      <div className='info-waves-container'>
+        <svg className='waves' id='waves' xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="#fefeff" fillOpacity="1" d="M0,64L40,64C80,64,160,64,240,90.7C320,117,400,171,480,181.3C560,192,640,160,720,154.7C800,149,880,171,960,181.3C1040,192,1120,192,1200,186.7C1280,181,1360,171,1400,165.3L1440,160L1440,320L1400,320C1360,320,1280,320,1200,320C1120,320,1040,320,960,320C880,320,800,320,720,320C640,320,560,320,480,320C400,320,320,320,240,320C160,320,80,320,40,320L0,320Z"></path></svg>
+        <div className='specific-info'>
+          <h1 className='city-name' style={ {color: font_color} }>{ data.city.name }</h1>
+          <span className='date-text bold'>Date: </span>
+          <select id="select-date" onChange={ handleDateSelectChange } style={ {
+            borderColor: font_color.replace('rgb', 'rgba').replace(')', ', 0.4)')
+          } }>
+            {
+              getDatesArr(data.list).map((date, index) => (
+                <option key={ index } value={ date }>{ date }</option>
+              ))
+            }
+          </select>
+          <select id="select-hour" onChange={ handleHourSelectChange } style={ {
+            borderColor: font_color.replace('rgb', 'rgba').replace(')', ', 0.4)')
+          } }>
+            {
+              hours_arr.map((hour, index) => (
+                <option key={ index } value={ hour }>{ hour }</option>
+              ))
+            }
+          </select>
+          <div className='forecast-weather-container'>
+            {
+              data.list.slice(required_index, required_index + 5).map((ele, i) => forecastWeatherElement(ele.weather[0].icon, ele.dt_txt.split(' ')[1].split(':')[0], i))
+            }
           </div>
-          {
-            current_info_display ? infoData(current_data.main) : infoData(data.list.filter(ele => ele.dt_txt === date + ' ' + hour)[0].main)
-          }
+          <div className='info-main'>
+            <div className='tabs-container'>
+              <div id='today-tab' className='info-main-tab' style={ {borderBottom: `2px solid ${font_color}`} } onClick={ () => handleTabChange('today') }>TODAY</div>
+              <div id='forecast-tab' className='info-main-tab' onClick={ () => handleTabChange('forecast') }>FORECAST</div>
+            </div>
+            {
+              (current_info_display ? infoData(current_data.main) : infoData(data.list.filter(ele => ele.dt_txt === date + ' ' + hour)[0].main)) || ''
+            }
+          </div>
         </div>
       </div>
+      
     </div>
   )
 }
