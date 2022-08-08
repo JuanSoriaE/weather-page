@@ -1,7 +1,7 @@
 .modal-overlay {
   width: 100vw;
   height: 100vh;
-  background-color: rgba(255, 255, 255, 0.6);
+  background-color: rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(2px);
   position: fixed;
   display: flex;
@@ -13,8 +13,8 @@
 .loading-spinner {
   width: 100px;
   height: 100px;
-  border: 17px solid #fff;
-  border-top: 17px solid rgb(165, 221, 253);
+  border: 17px solid rgb(223, 223, 223);
+  border-top: 17px solid rgb(101, 175, 218);
   border-radius: 50%;
   animation: spinner 1.5s linear infinite;
 }

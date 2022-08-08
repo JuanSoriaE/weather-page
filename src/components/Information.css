@@ -1,0 +1,9 @@
+.info-data-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 25px;
+}
+
+.info-data-key {
+  font-weight: 500;
+}

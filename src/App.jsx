@@ -1,12 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { BsCloudDrizzle, BsCloudMoon, BsCloudRain, BsCloudSun } from 'react-icons/bs';
-import { IoSnowOutline } from 'react-icons/io5';
-import { TbMist } from 'react-icons/tb';
-import { TiWeatherNight, TiWeatherSunny } from 'react-icons/ti';
-import { WiDayThunderstorm, WiNightAltThunderstorm } from 'react-icons/wi';
 import './App.css';
+import ForecastWeatherCard from './components/ForecastWeatherCard';
+import Infomation from './components/Information';
 import ModalLoading from './components/ModalLoading';
-
 
 const APIKEY = '573f8e9a386bca9cafc258bce0c1d683';
 const url = (city = 'californ') => `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${APIKEY}`;
@@ -47,78 +43,6 @@ const FONTCOLORDICTIONARY = {
   '11n': 'rgb(21, 29, 51)',
   '13n': 'rgb(54, 54, 61)',
   '50n': 'rgb(50,50,50)'
-}
-const ICONDICTIONARY = {
-  // DAY
-  '01d': <TiWeatherSunny className='weather-icon' />,
-  '02d': <BsCloudSun className='weather-icon' />,
-  '09d': <BsCloudDrizzle className='weather-icon' />,
-  '10d': <BsCloudRain className='weather-icon' />,
-  '11d': <WiDayThunderstorm className='weather-icon' />,
-  '13d': <IoSnowOutline className='weather-icon' />,
-  '50d': <TbMist className='weather-icon' />,
-  // NIGHT
-  '01n': <TiWeatherNight className='weather-icon' />,
-  '02n': <BsCloudMoon className='weather-icon' />,
-  '09n': <BsCloudDrizzle className='weather-icon' />,
-  '10n': <BsCloudRain className='weather-icon' />,
-  '11n': <WiNightAltThunderstorm className='weather-icon' />,
-  '13n': <IoSnowOutline className='weather-icon' />,
-  '50n': <TbMist className='weather-icon' />,
-};
-const MAINDATADICTIONARY = {
-  temp: 'Temperature',
-  temp_min: 'Min Temperature',
-  temp_max: 'Max Temperature',
-  feels_like: 'Feels like',
-  humidity: 'Humidity',
-  pressure: 'Pressure',
-  sea_level: 'Sea level pressure',
-  grnd_level: 'Ground level pressure'
-};
-
-const forecastWeatherElement = (key, hour, index) => {
-  if (key === '03d' || key === '04d') key = '02d';
-  if (key === '03n' || key === '04n') key = '02n';
-
-  return (
-    <div className='forecast-weather-element' key={ index }>
-      { ICONDICTIONARY[key] }
-      <span>{ hour }</span>
-    </div>
-  )
-};
-
-const getUnitsClass = key => {
-  if (key.includes('temp') || key === 'feels_like') return ' degs';
-  if (key.includes('level') || key === 'pressure') return ' pressure';
-  if (key === 'humidity') return ' humidity';
-  return '';
-};
-
-const infoData = (data) => {
-  if (!data) return (
-    <div className='info-data-container'>
-      <span>No data available.</span>
-    </div>
-  );
-  // infot_to_display: true = today | false = forecast
-  if (data.temp_kf) delete data.temp_kf;
-
-  return (
-    <div className='info-data-container'>
-      {
-        Object.entries(data).map((info_data, index) => (
-          <div key={ index } className='info-data-row'>
-            <div className='info-data-key'>{ MAINDATADICTIONARY[info_data[0]] }</div>
-            <div className={ 'info-data-value' + getUnitsClass(info_data[0]) }>
-              { (info_data[0].includes('temp') || info_data[0] === 'feels_like') ? Math.round(info_data[1] - 273.15) : info_data[1] }
-            </div>
-          </div>
-        ))
-      }
-    </div>
-  );
 };
 
 function App() {
@@ -280,12 +204,12 @@ function App() {
     let today_tab = document.getElementById('today-tab');
     let forecast_tab = document.getElementById('forecast-tab');
 
-    if (tab === 'today') {
+    if (tab === 'today' && !current_info_display) {
       setCurrentInfoDisplay(true);
 
       forecast_tab.style.border = 'none';
       today_tab.style.borderBottom = `2px solid ${font_color}`;
-    } else {
+    } else if (tab === 'forecast' && current_info_display) {
       setCurrentInfoDisplay(false);
 
       today_tab.style.borderBottom = 'none';
@@ -298,7 +222,7 @@ function App() {
     fetchData();
   }, []);
 
-  return (data.city && current_data) && (
+  return (data.city && current_data.weather) && (
     <div className='App'>
       {
         // Loading Spinner
@@ -316,18 +240,18 @@ function App() {
         <div className='specific-info'>
           <h1 className='city-name' style={ {color: font_color} }>{ data.city.name }</h1>
           <span className='date-text bold'>Date: </span>
-          <select id="select-date" onChange={ handleDateSelectChange } style={ {
-            borderColor: font_color.replace('rgb', 'rgba').replace(')', ', 0.4)')
-          } }>
+          <select id="select-date" 
+            onChange={ handleDateSelectChange } 
+            style={ {borderColor: font_color.replace('rgb', 'rgba').replace(')', ', 0.4)')} }>
             {
               getDatesArr(data.list).map((date, index) => (
                 <option key={ index } value={ date }>{ date }</option>
               ))
             }
           </select>
-          <select id="select-hour" onChange={ handleHourSelectChange } style={ {
-            borderColor: font_color.replace('rgb', 'rgba').replace(')', ', 0.4)')
-          } }>
+          <select id="select-hour" 
+            onChange={ handleHourSelectChange } 
+            style={ {borderColor: font_color.replace('rgb', 'rgba').replace(')', ', 0.4)')} }>
             {
               hours_arr.map((hour, index) => (
                 <option key={ index } value={ hour }>{ hour }</option>
@@ -336,21 +260,30 @@ function App() {
           </select>
           <div className='forecast-weather-container'>
             {
-              data.list.slice(required_index, required_index + 5).map((ele, i) => forecastWeatherElement(ele.weather[0].icon, ele.dt_txt.split(' ')[1].split(':')[0], i))
+              data.list.slice(required_index, required_index + 5).map((ele, idx) => 
+                <ForecastWeatherCard key={ idx } 
+                  icon_key={ ele.weather[0].icon } 
+                  hour={ ele.dt_txt.split(' ')[1].split(':')[0] } />
+              )
             }
           </div>
           <div className='info-main'>
             <div className='tabs-container'>
-              <div id='today-tab' className='info-main-tab' style={ {borderBottom: `2px solid ${font_color}`} } onClick={ () => handleTabChange('today') }>TODAY</div>
-              <div id='forecast-tab' className='info-main-tab' onClick={ () => handleTabChange('forecast') }>FORECAST</div>
+              <div id='today-tab' className='info-main-tab' 
+                style={ {borderBottom: `2px solid ${font_color}`} } 
+                onClick={ () => handleTabChange('today') }>TODAY</div>
+              <div id='forecast-tab' className='info-main-tab' 
+                onClick={ () => handleTabChange('forecast') }>FORECAST</div>
             </div>
-            {
-              (current_info_display ? infoData(current_data.main) : infoData(data.list[required_index].main)) || ''
-            }
+            <div className='info-data-container'>
+              {
+                current_info_display ? <Infomation data={ current_data.main } /> : <Infomation data={ data.list[required_index].main } />
+              }
+            </div>
+            
           </div>
         </div>
       </div>
-      
     </div>
   )
 }
