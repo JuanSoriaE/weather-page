@@ -4,7 +4,7 @@ import ForecastWeatherCard from './components/ForecastWeatherCard';
 import Infomation from './components/Information';
 import ModalLoading from './components/ModalLoading';
 
-const APIKEY = '573f8e9a386bca9cafc258bce0c1d683';
+const APIKEY = import.meta.env.VITE_APIKEY;
 const url = (city = 'californ') => `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${APIKEY}`;
 const url_current = (city = 'californ') => `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${APIKEY}`;
 
