@@ -171,6 +171,8 @@ function App() {
   const handleInputChange = e => {
     e.preventDefault();
 
+    if(!e.target.value) return;
+
     fetchCurrentData(e.target.value || last_city);
     fetchData(e.target.value || last_city);
   };
@@ -217,6 +219,22 @@ function App() {
     }
   };
 
+  const getHumanDate = (unix_time, timezone_dif) => {
+    let DATESDICTIONARY = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    
+    let date_obj = new Date((unix_time + timezone_dif) * 1000);
+
+    let year = date_obj.getFullYear();
+    let month = (date_obj.getUTCMonth() + 1).toString().padStart(2, 0);
+    let day = date_obj.getUTCDate().toString().padStart(2, 0);
+    let day_of_week = DATESDICTIONARY[date_obj.getUTCDay()];
+    
+    let hours = date_obj.getUTCHours().toString().padStart(2, 0);
+    let minutes = date_obj.getUTCMinutes().toString().padStart(2, 0);
+
+    return `${day_of_week}, ${year}-${month}-${day} ${hours}:${minutes}`;
+  };
+
   useEffect(() => {
     fetchCurrentData();
     fetchData();
@@ -231,6 +249,10 @@ function App() {
       <div id='main-info' ref={ main_info_ref } style={ {background: background} }>
         <div className='input-container'>
           <input type='text' className='city-input' id='city-name' placeholder='City Name' onChange={ handleInputChange } autoComplete='off' />
+        </div>
+        <div id='weather-date-container'>
+          <span id='weather-date'>{ getHumanDate(current_data.dt, current_data.timezone) }</span>
+          <span>Local time</span>
         </div>
         <span id='weather-status'>{ current_data.weather[0].description }</span>
         <span id='weather-deg'>{ Math.round(current_data.main.temp - 273.15) }</span>

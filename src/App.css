@@ -16,7 +16,8 @@
 .input-container {
   width: 100%;
   text-align: center;
-  margin: 10px 0 10px 0;
+  margin: 0;
+  margin-top: 10px;
 }
 
 .city-input {
@@ -33,6 +34,19 @@
 
 .city-input::placeholder {
   color: #fff;
+}
+
+#weather-date-container {
+  padding: 0 20px;
+  width: calc(100vw - 40px);
+}
+
+#weather-date-container > span {
+  text-align: right;
+  float: right;
+  font-size: 13px;
+  color: rgb(230, 230, 230);
+  width: 100%;
 }
 
 #weather-status {
