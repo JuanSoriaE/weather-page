@@ -1,6 +1,6 @@
 # weather-page
 Weather page consuming OpenWeatherApi.
-Designed for mobile
+Designed for mobile.
 
 ## Preview
 ![Preview GIF](./screenshots/preview.gif)
