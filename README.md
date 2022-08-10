@@ -1,9 +1,9 @@
 # weather-page
 Weather page consuming OpenWeatherApi.
+Designed for mobile
 
 ## Preview
-
+![Preview GIF](./screenshots/preview.gif)
 
 ## Live Page
-Designed for mobile
 [Link](https://juansoriae.github.io/weather-page/)
