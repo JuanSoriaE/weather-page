@@ -61,6 +61,22 @@ function App() {
   
   const main_info_ref = useRef(null);
 
+  const getHumanDate = (unix_time, timezone_dif = 0) => {
+    let DATESDICTIONARY = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    
+    let date_obj = new Date((unix_time + timezone_dif) * 1000);
+
+    let year = date_obj.getFullYear();
+    let month = (date_obj.getUTCMonth() + 1).toString().padStart(2, 0);
+    let day = date_obj.getUTCDate().toString().padStart(2, 0);
+    let day_of_week = DATESDICTIONARY[date_obj.getUTCDay()];
+    
+    let hours = date_obj.getUTCHours().toString().padStart(2, 0);
+    let minutes = date_obj.getUTCMinutes().toString().padStart(2, 0);
+
+    return `${day_of_week}, ${year}-${month}-${day} ${hours}:${minutes}`;
+  };
+
   const cleanRain = () => {
     var child = main_info_ref.current.lastElementChild;
 
@@ -98,15 +114,16 @@ function App() {
     setData(data);
     setStatus('ok');
     setLastCity(city);
-    setDate(data.list[0].dt_txt.split(' ')[0]);
-    setHour(data.list[0].dt_txt.split(' ')[1]);
+    
+    setDate(getHumanDate(data.list[0].dt, data.city.timezone).split(' ')[1]);
+    setHour(getHumanDate(data.list[0].dt, data.city.timezone).split(' ')[2]);
 
     // Set initial hours arr
     setHoursArr(
       [... new Set(
-        data.list.map(ele => ele.dt_txt)
+        data.list.map(ele => getHumanDate(ele.dt, data.city.timezone))
         .filter(date_ele => date_ele.includes(date)) // Get dates and hours of certain date
-        .map(ele => ele.split(' ')[1])
+        .map(ele => ele.split(' ')[2])
       )]
     );
   };
@@ -162,7 +179,7 @@ function App() {
     const complete_date = date + ' ' + hour;
 
     for (let i = 0; i < data.list.length; i++) {
-      if (data.list[i].dt_txt == complete_date) {
+      if ((getHumanDate(data.list[i].dt, data.city.timezone).split(' ').slice(1).join(' ') + ':00') == complete_date) {
         return setRequiredIndex(i);
       }
     }
@@ -178,7 +195,7 @@ function App() {
   };
 
   const getDatesArr = arr => {
-    return Array.from(new Set(arr.map(ele => ele.dt_txt.split(' ')[0])));
+    return Array.from(new Set(arr.map(ele => getHumanDate(ele.dt, data.city.timezone).split(' ')[1])));
   };
 
   const handleDateSelectChange = e => {
@@ -186,20 +203,21 @@ function App() {
     
     // Set hours arr to display options
     setHoursArr(
-      data.list.map(ele => ele.dt_txt)
+      data.list.map(ele => getHumanDate(ele.dt, data.city.timezone).split(' ').slice(1).join(' '))
         .filter(date => date.includes(e.target.value)) // Get dates and hours of certain date
         .map(ele => ele.split(' ')[1]) // Get only hours
     );
+    setHour(hours_arr[0] + ':00');
 
     // Change forecast data
     changeForecastData(e.target.value, hour);
   };
 
   const handleHourSelectChange = e => {
-    setHour(e.target.value);
+    setHour(e.target.value + ':00');
 
     // Change forecast data
-    changeForecastData(date, e.target.value);
+    changeForecastData(date, (e.target.value + ':00'));
   };
 
   const handleTabChange = tab => {
@@ -217,22 +235,6 @@ function App() {
       today_tab.style.borderBottom = 'none';
       forecast_tab.style.borderBottom = `2px solid ${font_color}`;
     }
-  };
-
-  const getHumanDate = (unix_time, timezone_dif) => {
-    let DATESDICTIONARY = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    
-    let date_obj = new Date((unix_time + timezone_dif) * 1000);
-
-    let year = date_obj.getFullYear();
-    let month = (date_obj.getUTCMonth() + 1).toString().padStart(2, 0);
-    let day = date_obj.getUTCDate().toString().padStart(2, 0);
-    let day_of_week = DATESDICTIONARY[date_obj.getUTCDay()];
-    
-    let hours = date_obj.getUTCHours().toString().padStart(2, 0);
-    let minutes = date_obj.getUTCMinutes().toString().padStart(2, 0);
-
-    return `${day_of_week}, ${year}-${month}-${day} ${hours}:${minutes}`;
   };
 
   useEffect(() => {
@@ -285,7 +287,7 @@ function App() {
               data.list.slice(required_index, required_index + 5).map((ele, idx) => 
                 <ForecastWeatherCard key={ idx } 
                   icon_key={ ele.weather[0].icon } 
-                  hour={ ele.dt_txt.split(' ')[1].split(':')[0] } />
+                  hour={ getHumanDate(ele.dt, data.city.timezone).split(' ')[2].split(':')[0] } />
               )
             }
           </div>
