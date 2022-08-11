@@ -209,6 +209,8 @@ function App() {
         .map(ele => ele.split(' ')[1]) // Get only hours
     );
 
+    setHour(hours_arr[0] + ':00');
+
     // Change forecast data
     changeForecastData(e.target.value, hour);
   };
