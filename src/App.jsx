@@ -120,12 +120,14 @@ function App() {
 
     // Set initial hours arr
     setHoursArr(
-      [... new Set(
+      Array.from(new Set(
         data.list.map(ele => getHumanDate(ele.dt, data.city.timezone))
         .filter(date_ele => date_ele.includes(date)) // Get dates and hours of certain date
         .map(ele => ele.split(' ')[2])
-      )]
+      ))
     );
+
+    console.log(hours_arr);
   };
 
   const handleSuccessFetchCurrentData = (data) => {
@@ -176,7 +178,8 @@ function App() {
   };
 
   const changeForecastData = (date, hour) => {
-    const complete_date = date + ' ' + hour;
+    let complete_date = date + ' ' + hour;
+    if (complete_date.length < 17) complete_date += ':00';
 
     for (let i = 0; i < data.list.length; i++) {
       if ((getHumanDate(data.list[i].dt, data.city.timezone).split(' ').slice(1).join(' ') + ':00') == complete_date) {
@@ -204,10 +207,9 @@ function App() {
     // Set hours arr to display options
     setHoursArr(
       data.list.map(ele => getHumanDate(ele.dt, data.city.timezone).split(' ').slice(1).join(' '))
-        .filter(date => date.includes(e.target.value)) // Get dates and hours of certain date
+        .filter(date_ele => date_ele.includes(e.target.value)) // Get dates and hours of certain date
         .map(ele => ele.split(' ')[1]) // Get only hours
     );
-    setHour(hours_arr[0] + ':00');
 
     // Change forecast data
     changeForecastData(e.target.value, hour);
