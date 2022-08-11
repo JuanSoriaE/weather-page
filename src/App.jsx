@@ -126,8 +126,6 @@ function App() {
         .map(ele => ele.split(' ')[2])
       ))
     );
-
-    console.log(hours_arr);
   };
 
   const handleSuccessFetchCurrentData = (data) => {
@@ -211,7 +209,6 @@ function App() {
         .map(ele => ele.split(' ')[1]) // Get only hours
     );
 
-    setHour(hours_arr[0] + ':00');
     // Change forecast data
     changeForecastData(e.target.value, hour);
   };
